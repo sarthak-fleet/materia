@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const compounds = (await getCollection('compounds')).sort((a, b) =>
+  a.data.name.localeCompare(b.data.name)
+);
+---
+
+<BaseLayout title="Compounds" description="The active compounds behind the remedies — traversable across every herb that contains them.">
+  <section class="container-x py-12">
+    <p class="eyebrow mb-3">Browse</p>
+    <h1 class="text-4xl">Active compounds</h1>
+    <p class="mt-3 max-w-xl text-muted">
+      The molecules doing the work. Each links to every remedy that contains it and the conditions
+      it reaches.
+    </p>
+    <ul class="mt-8 grid gap-3 sm:grid-cols-2">
+      {
+        compounds.map((c) => (
+          <li>
+            <a
+              href={`/compound/${c.id}`}
+              class="card block h-full p-4 transition-colors hover:border-accent hover:bg-accent-soft"
+            >
+              <p class="font-display text-lg text-ink">{c.data.name}</p>
+              {c.data.classification && (
+                <p class="mt-0.5 text-[12.5px] text-faint">{c.data.classification}</p>
+              )}
+              <p class="mt-1 text-sm text-muted">{c.data.summary}</p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>

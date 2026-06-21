@@ -1,0 +1,34 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Disclaimer from '@/components/astro/Disclaimer.astro';
+import SafetyChecker from '@/components/react/SafetyChecker';
+import { getCheckerData } from '@/lib/graph';
+
+const remedies = await getCheckerData();
+---
+
+<BaseLayout
+  title="Interaction & safety checker"
+  description="Build a list of the herbs, supplements, and drugs you take and check it for interactions, duplicate compounds, and shared risks."
+>
+  <section class="container-x py-12">
+    <p class="eyebrow mb-3">Safety</p>
+    <h1 class="text-4xl">Interaction &amp; safety checker</h1>
+    <p class="prose-materia mt-4 text-lg text-muted">
+      Add the herbs, supplements, and drugs you take. We flag recorded interactions, duplicate active
+      compounds, and combinations that pile up the same kind of risk — the herb-and-drug check that’s
+      usually locked behind a clinical paywall.
+    </p>
+
+    <div class="mt-6 max-w-2xl"><Disclaimer variant="block" /></div>
+
+    <div class="mt-10">
+      <SafetyChecker client:load remedies={remedies} />
+    </div>
+
+    <p class="mt-10 max-w-2xl text-[12.5px] text-faint">
+      This tool aggregates the interactions recorded in our cited sources and is not exhaustive — it
+      cannot replace a pharmacist or clinician, who can check your full medication list and conditions.
+    </p>
+  </section>
+</BaseLayout>

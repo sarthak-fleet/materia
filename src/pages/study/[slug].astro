@@ -1,0 +1,118 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import EvidenceBadge from '@/components/astro/EvidenceBadge.astro';
+import { getStudyCitedBy } from '@/lib/graph';
+import type { Grade } from '@/content.config';
+
+export async function getStaticPaths() {
+  const studies = await getCollection('studies');
+  return studies.map((s) => ({ params: { slug: s.id }, props: { study: s } }));
+}
+
+const { study } = Astro.props;
+const citedBy = await getStudyCitedBy(study.id);
+const conditions = await getCollection('conditions');
+const condName = (slug: string) => conditions.find((c) => c.id === slug)?.data.name ?? slug;
+
+const designLabel: Record<string, string> = {
+  'systematic-review': 'Systematic review',
+  'meta-analysis': 'Meta-analysis',
+  rct: 'Randomized controlled trial',
+  cohort: 'Cohort study',
+  'case-control': 'Case-control study',
+  'cross-sectional': 'Cross-sectional study',
+  'case-report': 'Case report',
+  'in-vitro': 'Laboratory (in vitro)',
+  animal: 'Animal study',
+  review: 'Narrative review',
+  other: 'Study',
+};
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+const facts = [
+  { label: 'Design', value: designLabel[study.data.design] },
+  { label: 'Year', value: String(study.data.year) },
+  { label: 'Sample size', value: study.data.n ? study.data.n.toLocaleString() : undefined },
+  { label: 'Population', value: study.data.population },
+  { label: 'Intervention', value: study.data.intervention },
+  { label: 'Outcome', value: study.data.outcome },
+  { label: 'Journal', value: study.data.journal },
+].filter((f) => f.value);
+---
+
+<BaseLayout title={study.data.title} description={study.data.effect} bare>
+  <article class="container-x py-12">
+    <p class="eyebrow mb-3">Research · {designLabel[study.data.design]}</p>
+    <h1 class="max-w-3xl text-3xl leading-tight">{study.data.title}</h1>
+
+    <div class="mt-6 grid gap-8 lg:grid-cols-[1.5fr_1fr]">
+      <div>
+        <div class="card p-5">
+          <h2 class="eyebrow mb-2">What it found</h2>
+          <p class="text-fg">{study.data.effect}</p>
+        </div>
+
+        <dl class="mt-5 grid grid-cols-2 gap-3">
+          {
+            facts.map((f) => (
+              <div class="card p-3">
+                <dt class="eyebrow">{f.label}</dt>
+                <dd class="mt-0.5 text-sm text-fg">{f.value}</dd>
+              </div>
+            ))
+          }
+        </dl>
+
+        <div class="mt-5 flex flex-wrap gap-3">
+          <a
+            href={study.data.url}
+            target="_blank"
+            rel="noopener nofollow"
+            class="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-strong"
+            >Read the source ↗</a
+          >
+          {
+            study.data.pmid && (
+              <a
+                href={`https://pubmed.ncbi.nlm.nih.gov/${study.data.pmid}/`}
+                target="_blank"
+                rel="noopener nofollow"
+                class="rounded-lg border border-line px-4 py-2 text-sm text-fg hover:border-line-strong"
+              >
+                PubMed {study.data.pmid}
+              </a>
+            )
+          }
+        </div>
+        <p class="mt-3 text-[12px] text-faint">Citation last checked {fmt(study.data.accessed)}.</p>
+      </div>
+
+      <aside>
+        <h2 class="font-display text-lg text-ink">Cited by</h2>
+        <p class="mt-1 text-sm text-muted">Claims in Materia that rely on this study.</p>
+        {
+          citedBy.length === 0 ? (
+            <p class="mt-3 text-sm text-faint">Not yet cited.</p>
+          ) : (
+            <ul class="mt-4 space-y-2">
+              {citedBy.map((c) => (
+                <li class="card flex items-center gap-3 p-3 text-sm">
+                  <EvidenceBadge grade={c.grade as Grade} size="sm" />
+                  <span>
+                    <a href={`/remedy/${c.remedy.id}`} class="font-medium text-ink hover:text-accent">
+                      {c.remedy.data.name}
+                    </a>
+                    <span class="text-faint"> for </span>
+                    <a href={`/condition/${c.conditionSlug}`} class="text-fg hover:text-accent">
+                      {condName(c.conditionSlug)}
+                    </a>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </aside>
+    </div>
+  </article>
+</BaseLayout>

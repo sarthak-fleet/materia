@@ -1,0 +1,65 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  studies?: CollectionEntry<'studies'>[];
+  sources?: CollectionEntry<'sources'>[];
+  compact?: boolean;
+}
+const { studies = [], sources = [], compact = false } = Astro.props;
+
+const designLabel: Record<string, string> = {
+  'systematic-review': 'Systematic review',
+  'meta-analysis': 'Meta-analysis',
+  rct: 'Randomized trial',
+  cohort: 'Cohort study',
+  'case-control': 'Case-control study',
+  'cross-sectional': 'Cross-sectional study',
+  'case-report': 'Case report',
+  'in-vitro': 'Lab (in vitro)',
+  animal: 'Animal study',
+  review: 'Narrative review',
+  other: 'Study',
+};
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+---
+
+<ul class:list={['space-y-2', compact ? '' : 'space-y-3']}>
+  {
+    studies.map((s) => (
+      <li class="text-sm">
+        <a href={s.data.url} target="_blank" rel="noopener nofollow" class="link-accent font-medium">
+          {s.data.title}
+        </a>
+        <div class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-faint">
+          <span class="rounded bg-surface-2 px-1.5 py-0.5 font-mono text-[11px] text-muted">
+            {designLabel[s.data.design] ?? 'Study'}
+          </span>
+          <span>{s.data.year}</span>
+          {s.data.n && <span>· n={s.data.n.toLocaleString()}</span>}
+          {s.data.journal && <span>· {s.data.journal}</span>}
+          {s.data.pmid && <span>· PMID {s.data.pmid}</span>}
+          {s.data.doi && <span>· DOI {s.data.doi}</span>}
+        </div>
+        {!compact && s.data.effect && <p class="mt-1 text-muted">{s.data.effect}</p>}
+      </li>
+    ))
+  }
+  {
+    sources.map((s) => (
+      <li class="text-sm">
+        <a href={s.data.url} target="_blank" rel="noopener nofollow" class="link-accent font-medium">
+          {s.data.title}
+        </a>
+        <div class="mt-0.5 text-[12.5px] text-faint">
+          {s.data.publisher}
+          {s.data.year && <span> · {s.data.year}</span>}
+          <span> · accessed {fmt(s.data.accessed)}</span>
+        </div>
+      </li>
+    ))
+  }
+  {studies.length === 0 && sources.length === 0 && (
+    <li class="text-sm text-faint">No citations.</li>
+  )}
+</ul>

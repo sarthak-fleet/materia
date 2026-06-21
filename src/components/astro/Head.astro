@@ -1,0 +1,31 @@
+---
+import { site } from '@/data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Append " · Materia" automatically unless this is the home page. */
+  bare?: boolean;
+}
+
+const { title, description = site.description, bare = false } = Astro.props;
+const fullTitle = !title ? `${site.name} — ${site.tagline}` : bare ? title : `${title} · ${site.name}`;
+const canonical = new URL(Astro.url.pathname, site.url).href;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+<meta name="theme-color" content="#faf8f3" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={site.name} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="sitemap" href="/sitemap-index.xml" />

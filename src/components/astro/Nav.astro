@@ -1,0 +1,51 @@
+---
+import { site } from '@/data/site';
+
+const path = Astro.url.pathname;
+const isActive = (href: string) =>
+  href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`);
+---
+
+<header class="sticky top-0 z-40 border-b border-line bg-base/85 backdrop-blur-md">
+  <nav class="container-x flex h-14 items-center justify-between gap-4">
+    <a href="/" class="flex items-center gap-2" aria-label="Materia home">
+      <span
+        class="grid h-7 w-7 place-items-center rounded-md bg-accent text-[15px] font-semibold text-white"
+        style="font-family: var(--font-display)">M</span
+      >
+      <span class="text-[17px] font-medium tracking-tight text-ink" style="font-family: var(--font-display)"
+        >Materia</span
+      >
+    </a>
+
+    <div class="hidden items-center gap-1 sm:flex">
+      {
+        site.nav.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              'rounded-md px-3 py-1.5 text-sm transition-colors',
+              isActive(item.href)
+                ? 'bg-accent-soft text-accent-strong'
+                : 'text-muted hover:bg-surface-2 hover:text-ink',
+            ]}
+          >
+            {item.label}
+          </a>
+        ))
+      }
+    </div>
+
+    <a
+      href="/search"
+      class="flex items-center gap-2 rounded-md border border-line bg-surface px-3 py-1.5 text-sm text-faint transition-colors hover:border-line-strong hover:text-muted"
+      aria-label="Search"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        ><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg
+      >
+      <span class="hidden md:inline">Search</span>
+      <kbd class="hidden rounded bg-surface-2 px-1.5 font-mono text-[11px] text-faint md:inline">⌘K</kbd>
+    </a>
+  </nav>
+</header>

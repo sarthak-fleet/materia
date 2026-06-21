@@ -1,0 +1,104 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Disclaimer from '@/components/astro/Disclaimer.astro';
+import EvidenceBadge from '@/components/astro/EvidenceBadge.astro';
+import { getConditionView } from '@/lib/graph';
+
+export async function getStaticPaths() {
+  const conditions = await getCollection('conditions');
+  return conditions.map((c) => ({ params: { slug: c.id }, props: { condition: c } }));
+}
+
+const { condition } = Astro.props;
+const { bodyParts, remedies } = await getConditionView(condition);
+const { Content } = await render(condition);
+const redFlag = condition.data.severity === 'see-a-doctor' || condition.data.redFlags.length > 0;
+---
+
+<BaseLayout title={condition.data.name} description={condition.data.summary}>
+  <article class="container-x py-12">
+    <p class="eyebrow mb-3">Condition</p>
+    <h1 class="text-4xl">{condition.data.name}</h1>
+    <p class="prose-materia mt-4 text-lg text-muted">{condition.data.summary}</p>
+
+    {
+      bodyParts.length > 0 && (
+        <div class="mt-5 flex flex-wrap items-center gap-2">
+          <span class="eyebrow">Affects</span>
+          {bodyParts.map((p) => (
+            <a
+              href={`/part/${p.id}`}
+              class="rounded-full border border-line bg-surface px-3 py-1 text-sm text-fg hover:border-accent hover:bg-accent-soft"
+            >
+              {p.data.name}
+            </a>
+          ))}
+        </div>
+      )
+    }
+
+    <div class="mt-6 max-w-2xl"><Disclaimer variant="block" /></div>
+
+    {
+      redFlag && (
+        <div class="card mt-6 border-[var(--color-warn)]/30 bg-[var(--color-warn-soft)]/60 p-5">
+          <h2 class="flex items-center gap-2 font-display text-lg text-[var(--color-warn)]">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z" />
+              <path d="M12 9v4" /><path d="M12 17h.01" />
+            </svg>
+            See a clinician
+          </h2>
+          <p class="mt-2 text-sm text-fg">
+            Some causes of {condition.data.name.toLowerCase()} need medical care, not self-treatment.
+            Seek help for any of these:
+          </p>
+          <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-fg">
+            {condition.data.redFlags.map((f) => (
+              <li>{f}</li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
+
+    <section class="mt-10">
+      <h2 class="font-display text-2xl text-ink">What may help</h2>
+      <p class="mt-1 text-sm text-muted">
+        Remedies studied for {condition.data.name.toLowerCase()}, ranked by strength of evidence.
+      </p>
+
+      {
+        remedies.length === 0 ? (
+          <p class="mt-4 text-sm text-faint">No graded remedies recorded yet.</p>
+        ) : (
+          <ul class="mt-5 space-y-3">
+            {remedies.map(({ remedy, claim }) => (
+              <li class="card flex items-start gap-4 p-4 transition-colors hover:border-line-strong">
+                <EvidenceBadge grade={claim.grade} size="lg" />
+                <div class="min-w-0 flex-1">
+                  <a href={`/remedy/${remedy.id}`} class="font-display text-lg text-ink hover:text-accent">
+                    {remedy.data.name}
+                  </a>
+                  <span class="ml-2 rounded bg-surface-2 px-1.5 py-0.5 align-middle text-[11px] uppercase tracking-wide text-muted">
+                    {remedy.data.kind}
+                  </span>
+                  <p class="mt-1 text-sm text-muted">{claim.summary}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </section>
+
+    {
+      condition.body && condition.body.trim().length > 0 && (
+        <section class="prose-materia mt-12 text-fg">
+          <Content />
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>

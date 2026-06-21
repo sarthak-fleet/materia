@@ -1,0 +1,7 @@
+{
+  // Cloudflare Pages config — lets `wrangler pages deploy` and the
+  // Cloudflare dashboard pick up the build automatically.
+  "name": "materia",
+  "compatibility_date": "2026-06-21",
+  "pages_build_output_dir": "dist"
+}

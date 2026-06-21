@@ -1,0 +1,46 @@
+---
+import { ALIGNMENT_META, TRADITION_LABEL } from '@/lib/grades';
+
+interface TClaim {
+  system: string;
+  claim: string;
+  alignment: string;
+}
+interface Props {
+  tradition: TClaim[];
+}
+const { tradition } = Astro.props;
+---
+
+{
+  tradition.length > 0 && (
+    <div class="card p-5">
+      <h3 class="font-display text-lg text-ink">Tradition vs. evidence</h3>
+      <p class="mt-1 text-[12.5px] text-faint">
+        Traditional use is context, not proof. Here is what older systems claim, and how modern
+        research treats it.
+      </p>
+      <ul class="mt-4 space-y-3">
+        {tradition.map((t) => {
+          const a = ALIGNMENT_META[t.alignment] ?? ALIGNMENT_META.unstudied;
+          return (
+            <li class="border-l-2 pl-3" style={`border-color:${a.color}`}>
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-sm font-medium text-ink">
+                  {TRADITION_LABEL[t.system] ?? t.system}
+                </span>
+                <span
+                  class="rounded-full px-2 py-0.5 text-[11px] font-medium text-white"
+                  style={`background:${a.color}`}
+                >
+                  {a.label}
+                </span>
+              </div>
+              <p class="mt-1 text-sm text-muted">{t.claim}</p>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  )
+}

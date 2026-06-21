@@ -1,0 +1,24 @@
+---
+import { GRADE_META } from '@/lib/grades';
+import type { Grade } from '@/content.config';
+
+interface Props {
+  grade: Grade;
+  size?: 'sm' | 'md' | 'lg';
+  showLabel?: boolean;
+}
+const { grade, size = 'md', showLabel = false } = Astro.props;
+const meta = GRADE_META[grade];
+const dim = size === 'lg' ? 'h-10 w-10 text-xl' : size === 'sm' ? 'h-6 w-6 text-xs' : 'h-8 w-8 text-base';
+---
+
+<span class="inline-flex items-center gap-2" title={`${meta.label}`}>
+  <span
+    class:list={['grid place-items-center rounded-lg font-display font-semibold text-white', dim]}
+    style={`background:${meta.color}`}
+    aria-label={meta.label}
+  >
+    {meta.letter}
+  </span>
+  {showLabel && <span class="text-sm text-muted">{meta.short}</span>}
+</span>

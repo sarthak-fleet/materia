@@ -1,0 +1,123 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const grades = [
+  {
+    g: 'A',
+    label: 'Strong',
+    color: 'var(--color-grade-a)',
+    desc: 'Consistent results from high-quality randomized trials or systematic reviews / meta-analyses.',
+  },
+  {
+    g: 'B',
+    label: 'Moderate',
+    color: 'var(--color-grade-b)',
+    desc: 'Some randomized trials, but limited in number, size, or consistency.',
+  },
+  {
+    g: 'C',
+    label: 'Limited',
+    color: 'var(--color-grade-c)',
+    desc: 'Preliminary, small, or observational human evidence; promising but not settled.',
+  },
+  {
+    g: 'D',
+    label: 'Weak',
+    color: 'var(--color-grade-d)',
+    desc: 'Traditional use, anecdote, or only lab / animal data. No reliable human evidence of benefit.',
+  },
+  {
+    g: '—',
+    label: 'Insufficient',
+    color: 'var(--color-grade-none)',
+    desc: 'Not enough trustworthy evidence to grade in either direction.',
+  },
+];
+---
+
+<BaseLayout title="Methodology">
+  <article class="container-x py-14">
+    <p class="eyebrow mb-3">How Materia works</p>
+    <h1 class="text-4xl">Methodology</h1>
+    <div class="prose-materia mt-6 text-fg">
+      <p>
+        Materia exists to answer one question honestly: <em
+          >what does the research actually say about taking X for Y?</em
+        > Every claim on the site is graded by the strength of the evidence and linked to the studies
+        behind it. We grade conservatively — a remedy earns a high grade only when good human
+        research backs it.
+      </p>
+      <p>
+        <strong>Materia is an aggregator, not an authority.</strong> We summarize and link to external
+        sources — government health agencies (NCCIH, MedlinePlus, NIH ODS), Cochrane reviews, and
+        peer-reviewed studies — and we do not make our own medical claims. Every statement traces to a
+        citation; if we can’t point to a source, we don’t publish it.
+      </p>
+
+      <h2>The evidence-grade scale</h2>
+      <p>
+        Grades are assigned <strong>per remedy × condition</strong>, never to a remedy as a whole.
+        Turmeric might be a B for knee osteoarthritis and insufficient for everything else. Under the
+        hood we reason about the <em>certainty</em> of the evidence (in the spirit of GRADE) and
+        present it as a single consumer-facing letter.
+      </p>
+    </div>
+
+    <ul class="mt-8 grid gap-3">
+      {
+        grades.map((row) => (
+          <li class="card flex items-start gap-4 p-4">
+            <span
+              class="grid h-9 w-9 shrink-0 place-items-center rounded-lg font-display text-lg font-semibold text-white"
+              style={`background:${row.color}`}
+            >
+              {row.g}
+            </span>
+            <div>
+              <p class="font-medium text-ink">{row.label}</p>
+              <p class="mt-0.5 text-sm text-muted">{row.desc}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="prose-materia mt-10 text-fg">
+      <h2>Efficacy and safety are separate</h2>
+      <p>
+        A high efficacy grade says nothing about safety. We track interactions, contraindications,
+        side effects, and pregnancy cautions independently, and always show them next to any
+        information about use.
+      </p>
+
+      <h2>We describe, we don’t prescribe</h2>
+      <p>
+        Where we mention amounts, we report <em>what researchers studied</em> (“studied at
+        500–1,000&nbsp;mg/day in trials”), never a dose to take. Materia is a reference, not a
+        prescription.
+      </p>
+
+      <h2>Tradition vs. evidence</h2>
+      <p>
+        Many remedies carry long histories in Ayurveda, Traditional Chinese Medicine, or Western
+        herbalism. We record those traditional claims honestly and label whether modern evidence
+        <em>aligns</em>, <em>conflicts</em>, is <em>mixed</em>, or simply hasn’t studied them. A
+        tradition is context, not proof.
+      </p>
+
+      <h2>Sources</h2>
+      <p>
+        We cite primary research (with PubMed / DOI links, study design, and sample size) wherever
+        possible, supported by authoritative secondary sources such as the U.S. National Center for
+        Complementary and Integrative Health (NCCIH), MedlinePlus, Cochrane, and Memorial Sloan
+        Kettering’s About Herbs database. Every citation shows when we last checked it.
+      </p>
+
+      <h2>What Materia is not</h2>
+      <p>
+        It is not a diagnosis tool, not a substitute for a clinician, and not sponsored by anyone who
+        sells what it describes. It carries no ads and no affiliate links.
+      </p>
+    </div>
+  </article>
+</BaseLayout>

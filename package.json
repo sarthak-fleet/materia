@@ -1,0 +1,46 @@
+{
+  "name": "materia",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "homepage": "https://materia.io",
+  "description": "Materia — the Examine.com of the whole body. Explore a layered human body and find evidence-graded, study-cited herbs, supplements, and drugs for any part or condition.",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "NODE_OPTIONS=--max-old-space-size=8192 astro check",
+    "checks": "node scripts/content-checks.mjs",
+    "format": "biome format --write .",
+    "lint": "biome check ."
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.2.6",
+    "@astrojs/react": "^4.3.0",
+    "@astrojs/sitemap": "^3.4.0",
+    "@fontsource-variable/fraunces": "^5.2.5",
+    "@fontsource-variable/inter": "^5.2.5",
+    "@nanostores/react": "^0.8.4",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
+    "@tailwindcss/vite": "^4.1.7",
+    "astro": "^5.8.0",
+    "cmdk": "^1.1.1",
+    "lucide-react": "^0.460.0",
+    "nanostores": "^0.11.3",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.7",
+    "three": "^0.171.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@biomejs/biome": "2.5.0",
+    "@types/react": "^19.1.4",
+    "@types/react-dom": "^19.1.5",
+    "lightningcss": "^1.32.0",
+    "typescript": "^5.8.3"
+  }
+}

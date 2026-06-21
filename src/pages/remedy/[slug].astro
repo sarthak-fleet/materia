@@ -1,0 +1,130 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Disclaimer from '@/components/astro/Disclaimer.astro';
+import EvidenceBadge from '@/components/astro/EvidenceBadge.astro';
+import CitationList from '@/components/astro/CitationList.astro';
+import SafetyBlock from '@/components/astro/SafetyBlock.astro';
+import UseGuidance from '@/components/astro/UseGuidance.astro';
+import TraditionOverlay from '@/components/astro/TraditionOverlay.astro';
+import { getRemedyView } from '@/lib/graph';
+
+export async function getStaticPaths() {
+  const remedies = await getCollection('remedies');
+  return remedies.map((r) => ({ params: { slug: r.id }, props: { remedy: r } }));
+}
+
+const { remedy } = Astro.props;
+const { efficacy, compounds, interactions } = await getRemedyView(remedy);
+const { Content } = await render(remedy);
+const tradition = efficacy.flatMap((e) => e.tradition);
+---
+
+<BaseLayout title={remedy.data.name} description={remedy.data.summary}>
+  <article class="container-x py-12">
+    <p class="eyebrow mb-3">Remedy · {remedy.data.kind}</p>
+    <h1 class="text-4xl">{remedy.data.name}</h1>
+    {
+      remedy.data.aliases.length > 0 && (
+        <p class="mt-1 text-sm text-faint">Also: {remedy.data.aliases.join(', ')}</p>
+      )
+    }
+    <p class="prose-materia mt-4 text-lg text-muted">{remedy.data.summary}</p>
+
+    {
+      compounds.length > 0 && (
+        <div class="mt-5 flex flex-wrap items-center gap-2">
+          <span class="eyebrow">Active compounds</span>
+          {compounds.map((c) => (
+            <a
+              href={`/compound/${c.id}`}
+              class="rounded-full border border-line bg-surface px-3 py-1 text-sm text-fg hover:border-accent hover:bg-accent-soft"
+            >
+              {c.data.name}
+            </a>
+          ))}
+        </div>
+      )
+    }
+
+    <div class="mt-6 max-w-2xl"><Disclaimer variant="block" /></div>
+
+    <div class="mt-10 grid gap-8 lg:grid-cols-[1.6fr_1fr]">
+      <section>
+        <h2 class="font-display text-2xl text-ink">Evidence by condition</h2>
+        <p class="mt-1 text-sm text-muted">
+          Each grade reflects the research for {remedy.data.name} and that condition specifically.
+        </p>
+        {
+          efficacy.length === 0 ? (
+            <p class="mt-4 text-sm text-faint">No graded conditions recorded yet.</p>
+          ) : (
+            <ul class="mt-5 space-y-4">
+              {efficacy.map((e) => (
+                <li class="card p-5">
+                  <div class="flex items-start gap-4">
+                    <EvidenceBadge grade={e.grade} size="lg" />
+                    <div class="min-w-0 flex-1">
+                      <a
+                        href={`/condition/${e.condition.id}`}
+                        class="font-display text-lg text-ink hover:text-accent"
+                      >
+                        {e.condition.data.name}
+                      </a>
+                      <p class="mt-1 text-sm text-muted">{e.summary}</p>
+                    </div>
+                  </div>
+                  {(e.studies.length > 0 || e.sources.length > 0) && (
+                    <details class="mt-3 border-t border-line pt-3">
+                      <summary class="cursor-pointer text-[12.5px] font-medium text-accent">
+                        {e.studies.length + e.sources.length} citation
+                        {e.studies.length + e.sources.length === 1 ? '' : 's'}
+                      </summary>
+                      <div class="mt-3">
+                        <CitationList studies={e.studies} sources={e.sources} compact />
+                      </div>
+                    </details>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )
+        }
+
+        {
+          remedy.body && remedy.body.trim().length > 0 && (
+            <section class="prose-materia mt-10 text-fg">
+              <Content />
+            </section>
+          )
+        }
+      </section>
+
+      <aside class="space-y-6">
+        <UseGuidance typicalUse={remedy.data.typicalUse} />
+        <SafetyBlock safety={remedy.data.safety} />
+
+        {
+          interactions.length > 0 && (
+            <div class="card p-5">
+              <h3 class="font-display text-lg text-ink">Known interactions</h3>
+              <ul class="mt-3 space-y-2">
+                {interactions.map((i) => (
+                  <li class="text-sm">
+                    <a href={`/remedy/${i.target.id}`} class="font-medium text-fg hover:text-accent">
+                      {i.target.data.name}
+                    </a>
+                    <span class="ml-1 text-[12px] text-faint">({i.severity})</span>
+                    <p class="text-[12.5px] text-muted">{i.mechanism}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        }
+
+        <TraditionOverlay tradition={tradition} />
+      </aside>
+    </div>
+  </article>
+</BaseLayout>

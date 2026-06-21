@@ -1,0 +1,89 @@
+---
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import BodyExplorer from '@/components/react/BodyExplorer';
+import { SYSTEMS } from '@/data/systems';
+import { getExplorerParts } from '@/lib/graph';
+
+const parts = await getExplorerParts();
+
+// Resolve at build time which anatomical layers have a 3D model present, so the
+// explorer can swap the model when you toggle layers.
+const MODEL_FILES: Record<string, string> = {
+  skeletal: 'body.glb',
+  muscular: 'body-muscular.glb',
+  organs: 'body-organs.glb',
+  nervous: 'body-nervous.glb',
+  cardiovascular: 'body-cardiovascular.glb',
+  respiratory: 'body-respiratory.glb',
+  digestive: 'body-digestive.glb',
+  endocrine: 'body-endocrine.glb',
+  integumentary: 'body-integumentary.glb',
+};
+const models: Record<string, string> = {};
+for (const [sys, file] of Object.entries(MODEL_FILES)) {
+  if (existsSync(fileURLToPath(new URL(`../../public/models/${file}`, import.meta.url)))) {
+    models[sys] = `/models/${file}?v=hd`;
+  }
+}
+const hasAnyModel = Object.keys(models).length > 0;
+---
+
+<BaseLayout>
+  <section class="container-x grid items-center gap-10 py-16 lg:grid-cols-[1.05fr_1fr] lg:py-24">
+    <div style="animation: rise 0.6s var(--ease-out-expo) both">
+      <p class="eyebrow mb-4">Evidence-graded · Ad-free · Fully cited</p>
+      <h1 class="text-4xl leading-[1.05] sm:text-5xl">
+        The whole body,<br /><span class="text-accent">evidence-graded.</span>
+      </h1>
+      <p class="prose-materia mt-6 text-lg text-muted">
+        Explore a layered human body, click any part, and see the herbs, supplements, and drugs
+        that may help — each one graded by the strength of the research and linked to the studies
+        behind it.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a
+          href="#explorer"
+          class="rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-strong"
+          >Start exploring</a
+        >
+        <a
+          href="/methodology"
+          class="rounded-lg border border-line bg-surface px-5 py-2.5 text-sm font-medium text-fg transition-colors hover:border-line-strong"
+          >How we grade evidence</a
+        >
+      </div>
+    </div>
+
+    <div id="explorer" style="animation: rise 0.7s var(--ease-out-expo) both; animation-delay: 0.08s">
+      {
+        hasAnyModel ? (
+          <BodyExplorer client:only="react" parts={parts} models={models} />
+        ) : (
+          <BodyExplorer client:visible parts={parts} models={models} />
+        )
+      }
+    </div>
+  </section>
+
+  <section class="container-x pb-8">
+    <h2 class="eyebrow mb-4">Anatomical layers</h2>
+    <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        SYSTEMS.map((s) => (
+          <li class="card flex items-start gap-3 p-4">
+            <span class="mt-0.5 h-2 w-2 shrink-0 rounded-full" style={`background:${s.available ? 'var(--color-accent)' : 'var(--color-grade-none)'}`} />
+            <div>
+              <p class="font-medium text-ink">
+                {s.name}
+                {!s.available && <span class="ml-2 text-[11px] font-normal text-faint">coming soon</span>}
+              </p>
+              <p class="mt-0.5 text-sm text-muted">{s.blurb}</p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>

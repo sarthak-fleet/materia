@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+
+const conditions = (await getCollection('conditions')).sort((a, b) =>
+  a.data.name.localeCompare(b.data.name)
+);
+---
+
+<BaseLayout title="Conditions" description="Browse conditions and the evidence-graded remedies studied for them.">
+  <section class="container-x py-12">
+    <p class="eyebrow mb-3">Browse</p>
+    <h1 class="text-4xl">Conditions</h1>
+    <p class="mt-3 max-w-xl text-muted">
+      {conditions.length} conditions, each with the herbs, supplements, and drugs studied for it.
+    </p>
+    <ul class="mt-8 grid gap-3 sm:grid-cols-2">
+      {
+        conditions.map((c) => (
+          <li>
+            <a
+              href={`/condition/${c.id}`}
+              class="card block h-full p-4 transition-colors hover:border-accent hover:bg-accent-soft"
+            >
+              <p class="font-display text-lg text-ink">{c.data.name}</p>
+              <p class="mt-1 text-sm text-muted">{c.data.summary}</p>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>

@@ -1,0 +1,54 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import EvidenceBadge from '@/components/astro/EvidenceBadge.astro';
+import { GRADE_META } from '@/lib/grades';
+import type { Grade } from '@/content.config';
+
+const GRADE_RANK: Record<string, number> = { A: 0, B: 1, C: 2, D: 3, insufficient: 4 };
+const remedies = (await getCollection('remedies'))
+  .map((r) => {
+    const best = [...r.data.efficacy].sort((a, b) => GRADE_RANK[a.grade] - GRADE_RANK[b.grade])[0];
+    return { r, best: best?.grade as Grade | undefined };
+  })
+  .sort((a, b) => a.r.data.name.localeCompare(b.r.data.name));
+---
+
+<BaseLayout title="Remedies" description="Browse herbs, supplements, chemicals, and drugs with evidence-graded, cited uses.">
+  <section class="container-x py-12">
+    <p class="eyebrow mb-3">Browse</p>
+    <h1 class="text-4xl">Remedies</h1>
+    <p class="mt-3 max-w-xl text-muted">
+      {remedies.length} herbs, supplements, and compounds — each with its best evidence grade and a
+      full, cited breakdown.
+    </p>
+    <ul class="mt-8 divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface">
+      {
+        remedies.map(({ r, best }) => (
+          <li>
+            <a
+              href={`/remedy/${r.id}`}
+              class="flex items-center gap-4 p-4 transition-colors hover:bg-accent-soft"
+            >
+              {best ? (
+                <EvidenceBadge grade={best} />
+              ) : (
+                <span class="grid h-8 w-8 place-items-center rounded-lg bg-surface-2 text-faint">·</span>
+              )}
+              <div class="min-w-0 flex-1">
+                <p class="font-medium text-ink">
+                  {r.data.name}
+                  <span class="ml-2 text-[12px] font-normal uppercase tracking-wide text-faint">
+                    {r.data.kind}
+                  </span>
+                </p>
+                <p class="truncate text-sm text-muted">{r.data.summary}</p>
+              </div>
+              {best && <span class="hidden text-sm text-faint sm:block">{GRADE_META[best].short}</span>}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>
