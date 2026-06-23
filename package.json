@@ -14,7 +14,9 @@
     "check": "NODE_OPTIONS=--max-old-space-size=8192 astro check",
     "checks": "node scripts/content-checks.mjs",
     "format": "biome format --write .",
-    "lint": "biome check ."
+    "lint": "biome check .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.2.6",
@@ -41,6 +43,8 @@
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.5",
     "lightningcss": "^1.32.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^4.1.9",
+    "@vitest/coverage-v8": "^4.1.9"
   }
 }
