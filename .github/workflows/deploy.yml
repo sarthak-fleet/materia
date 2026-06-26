@@ -1,10 +1,18 @@
 name: Deploy materia to Cloudflare Pages
 
-# Manual-only for now. A `push` trigger will be added after a verified
-# workflow_dispatch run confirms the build + deploy reproduces the manual
-# `wrangler pages deploy` flow.
+# CI deploy verified 2026-06-26 — auto-deploys on push to main + manual dispatch.
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'astro.config.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'wrangler.jsonc'
+      - '.github/workflows/deploy.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
