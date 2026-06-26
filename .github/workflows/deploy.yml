@@ -1,0 +1,35 @@
+name: Deploy materia to Cloudflare Pages
+
+# Manual-only for now. A `push` trigger will be added after a verified
+# workflow_dispatch run confirms the build + deploy reproduces the manual
+# `wrangler pages deploy` flow.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: 'npm'
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # wrangler.jsonc declares `pages_build_output_dir: dist`, so the
+          # output dir is read from config; project name is pinned explicitly.
+          command: pages deploy dist --project-name=materia --branch=main --commit-dirty=true
+      - name: Smoke production
+        run: |
+          set -euo pipefail
+          curl --fail --retry 5 --retry-delay 5 --max-time 20 "https://materia-6bq.pages.dev/" >/dev/null
